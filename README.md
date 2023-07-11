@@ -1,1 +1,2 @@
 # HTML-Programs
+本仓库用于存放本人的用于手机或电脑的HTML项目。其中“Scratch HTML合集”文件夹为本人创作的转换为HTML的Scratch程序以及本人为该合集创作的主页。
