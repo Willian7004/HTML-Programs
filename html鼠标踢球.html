@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Circles</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Circle {
+        constructor(x, y, radius, color, dx, dy) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.color = color;
+            this.dx = dx;
+            this.dy = dy;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        update() {
+            this.checkCollision();
+            if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                this.dx = -this.dx;
+            }
+            if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                this.dy = -this.dy;
+            }
+            this.x += this.dx;
+            this.y += this.dy;
+            this.draw();
+        }
+
+        checkCollision() {
+            for (let other of circles) {
+                if (this === other) continue;
+                const dx = this.x - other.x;
+                const dy = this.y - other.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < this.radius + other.radius) {
+                    const angle = Math.atan2(dy, dx);
+                    const targetX = this.x + Math.cos(angle) * (this.radius + other.radius);
+                    const targetY = this.y + Math.sin(angle) * (this.radius + other.radius);
+                    const ax = (targetX - other.x) * 0.01;
+                    const ay = (targetY - other.y) * 0.01;
+                    this.dx -= ax;
+                    this.dy -= ay;
+                    other.dx += ax;
+                    other.dy += ay;
+                }
+            }
+        }
+    }
+
+    const circles = [];
+    const mouseCircle = new Circle(0, 0, 32, 'gray', 0, 0);
+
+    function createRandomCircle() {
+        let x, y, dx, dy;
+        let valid = false;
+        while (!valid) {
+            x = Math.random() * (canvas.width - 100) + 50;
+            y = Math.random() * (canvas.height - 100) + 50;
+            dx = (Math.random() - 0.5) * 2;
+            dy = (Math.random() - 0.5) * 2;
+            valid = true;
+            for (let circle of circles) {
+                if (Math.sqrt((x - circle.x) ** 2 + (y - circle.y) ** 2) < 100) {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+        circles.push(new Circle(x, y, 25, `#${Math.floor(Math.random() * 16777215).toString(16)}`, dx, dy));
+    }
+
+    for (let i = 0; i < 20; i++) {
+        createRandomCircle();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let circle of circles) {
+            circle.update();
+        }
+        mouseCircle.draw();
+    }
+
+    animate();
+
+    canvas.addEventListener('mousemove', (event) => {
+        mouseCircle.x = event.clientX;
+        mouseCircle.y = event.clientY;
+    });
+
+    canvas.addEventListener('mousemove', () => {
+        for (let circle of circles) {
+            const dx = mouseCircle.x - circle.x;
+            const dy = mouseCircle.y - circle.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < mouseCircle.radius + circle.radius) {
+                const angle = Math.atan2(dy, dx);
+                const targetX = mouseCircle.x - Math.cos(angle) * (mouseCircle.radius + circle.radius);
+                const targetY = mouseCircle.y - Math.sin(angle) * (mouseCircle.radius + circle.radius);
+                circle.dx = (targetX - circle.x) * 0.1;
+                circle.dy = (targetY - circle.y) * 0.1;
+            }
+        }
+    });
+</script>
+</body>
+</html>

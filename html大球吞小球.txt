@@ -1,0 +1,138 @@
+》使用html5在分辨率在当前窗口大小的页面生成30个直径48像素的随机颜色圆形，并且每两个圆形的间距大于48像素。每个圆形以每秒400像素的速度向随机方向移动，碰到页面边缘或者其它圆形时反弹。生成一个红色的直径72像素的跟随鼠标移动的圆形，这个圆形与其它圆形碰撞时使被碰撞的圆形消失，并在随机位置再次生成同样的以每秒400像素的速度向随机方向移动的圆形。
+
+为了实现这个功能，我们需要使用HTML5的Canvas元素和JavaScript。以下是一个完整的代码示例，包含了生成随机圆形、移动圆形、碰撞检测和跟随鼠标移动的红色圆形等功能。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Circles</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const circles = [];
+        const redCircle = {
+            x: 0,
+            y: 0,
+            radius: 36,
+            color: 'red',
+            speed: 0
+        };
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function createCircle() {
+            let circle;
+            let valid = false;
+            while (!valid) {
+                circle = {
+                    x: Math.random() * (canvas.width - 96) + 48,
+                    y: Math.random() * (canvas.height - 96) + 48,
+                    radius: 24,
+                    color: getRandomColor(),
+                    dx: Math.random() * 8 - 4,
+                    dy: Math.random() * 8 - 4
+                };
+                valid = true;
+                for (let c of circles) {
+                    if (Math.sqrt((circle.x - c.x) ** 2 + (circle.y - c.y) ** 2) < 96) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            return circle;
+        }
+
+        for (let i = 0; i < 30; i++) {
+            circles.push(createCircle());
+        }
+
+        function drawCircle(circle) {
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+            ctx.fillStyle = circle.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function updateCircle(circle) {
+            circle.x += circle.dx;
+            circle.y += circle.dy;
+
+            if (circle.x + circle.radius > canvas.width || circle.x - circle.radius < 0) {
+                circle.dx = -circle.dx;
+            }
+            if (circle.y + circle.radius > canvas.height || circle.y - circle.radius < 0) {
+                circle.dy = -circle.dy;
+            }
+        }
+
+        function checkCollision(circle1, circle2) {
+            const dx = circle1.x - circle2.x;
+            const dy = circle1.y - circle2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < circle1.radius + circle2.radius;
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let circle of circles) {
+                updateCircle(circle);
+                drawCircle(circle);
+            }
+
+            for (let i = circles.length - 1; i >= 0; i--) {
+                if (checkCollision(redCircle, circles[i])) {
+                    circles.splice(i, 1);
+                    circles.push(createCircle());
+                }
+            }
+
+            drawCircle(redCircle);
+
+            requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener('mousemove', (event) => {
+            redCircle.x = event.clientX;
+            redCircle.y = event.clientY;
+        });
+
+        animate();
+    </script>
+</body>
+</html>
+```
+
+这个代码实现了以下功能：
+1. 在页面中生成30个直径为48像素的随机颜色圆形，并且每两个圆形的间距大于48像素。
+2. 每个圆形以每秒400像素的速度向随机方向移动，碰到页面边缘或者其它圆形时反弹。
+3. 生成一个红色的直径72像素的跟随鼠标移动的圆形，这个圆形与其它圆形碰撞时使被碰撞的圆形消失，并在随机位置再次生成同样的以每秒400像素的速度向随机方向移动的圆形。
+
+请将这个代码保存为一个HTML文件并在支持HTML5的浏览器中打开。

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Color Grid</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 10px);
+            grid-template-rows: repeat(auto-fill, 10px);
+            width: 100vw;
+            height: 100vh;
+        }
+        .cell {
+            width: 10px;
+            height: 10px;
+        }
+        .time, .date {
+            position: absolute;
+            color: black;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+        }
+        .time {
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 50vh;
+        }
+        .date {
+            bottom: 10%;
+            font-size: 8vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid"></div>
+    <div class="time"></div>
+    <div class="date"></div>
+    <script>
+        function getRandomColor() {
+            let r, g, b;
+            do {
+                r = Math.floor(Math.random() * 256);
+                g = Math.floor(Math.random() * 256);
+                b = Math.floor(Math.random() * 256);
+            } while (r < 85 || g < 85 || b < 85);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function updateGrid() {
+            const grid = document.querySelector('.grid');
+            grid.innerHTML = '';
+            const width = Math.floor(window.innerWidth / 10);
+            const height = Math.floor(window.innerHeight / 10);
+            for (let i = 0; i < width * height; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.backgroundColor = getRandomColor();
+                grid.appendChild(cell);
+            }
+        }
+
+        function updateTimeAndDate() {
+            const now = new Date();
+            const timeElement = document.querySelector('.time');
+            const dateElement = document.querySelector('.date');
+            timeElement.textContent = now.toLocaleTimeString();
+            dateElement.textContent = now.toLocaleDateString();
+        }
+
+        function init() {
+            updateGrid();
+            updateTimeAndDate();
+            setInterval(updateGrid, 1000);
+            setInterval(updateTimeAndDate, 1000);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

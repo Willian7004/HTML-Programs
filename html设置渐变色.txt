@@ -1,0 +1,166 @@
+》制作一个html页面，开始时背景为黑色到白色的渐变，其中页面顶部为黑色，底部为白色。添加第一组颜色分别为红、黄、绿、青、蓝、紫的圆形按钮，按钮居中排列，与页面顶部距离为页面高度的15%直径为页面高度的10%。按钮边框为黑色，边框宽度为页面宽度的1%。按钮间距为页面宽度的5%。鼠标移动到按钮上时，按钮直径增大为页面高度的20%。在与页面底部距离为页面高度的15%处添加第二组同样的按钮。鼠标点击第一组按钮时，把页面顶部改为与按钮相同的颜色。鼠标点击第二组按钮时，把页面底部改为与按钮相同的颜色。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Gradient Page</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, black, white);
+            overflow: hidden;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 15vh 0;
+        }
+
+        .button {
+            width: 10vh;
+            height: 10vh;
+            border-radius: 50%;
+            border: 1vw solid black;
+            margin: 0 2.5vw;
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .button:hover {
+            width: 20vh;
+            height: 20vh;
+        }
+
+        .red { background-color: red; }
+        .yellow { background-color: yellow; }
+        .green { background-color: green; }
+        .cyan { background-color: cyan; }
+        .blue { background-color: blue; }
+        .purple { background-color: purple; }
+    </style>
+</head>
+<body>
+    <div class="button-container" id="top-buttons">
+        <div class="button red" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button yellow" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button green" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button cyan" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button blue" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button purple" onclick="changeTopColor(this.classList[1])"></div>
+    </div>
+    <div class="button-container" id="bottom-buttons">
+        <div class="button red" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button yellow" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button green" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button cyan" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button blue" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button purple" onclick="changeBottomColor(this.classList[1])"></div>
+    </div>
+
+    <script>
+        function changeTopColor(color) {
+            document.body.style.background = `linear-gradient(to bottom, ${color}, white)`;
+        }
+
+        function changeBottomColor(color) {
+            document.body.style.background = `linear-gradient(to bottom, black, ${color})`;
+        }
+    </script>
+</body>
+</html>
+```
+》修改以上程序，使改变页面顶部的颜色后改变页面底部的颜色，页面顶部保持改变后的颜色而非开始时的颜色，对改变页面底部的颜色后改变页面顶部的颜色的情况也做同样处理。另外鼠标移动到按钮上时按钮放大导致页面宽度增大，两侧有小部分区域溢出页面导致颜色没有被改变，可以尝试同步修改溢出页面的部分的颜色或避免页面宽度改变。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Gradient Page</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, black, white);
+            overflow: hidden;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 15vh 0;
+        }
+
+        .button {
+            width: 10vh;
+            height: 10vh;
+            border-radius: 50%;
+            border: 1vw solid black;
+            margin: 0 2.5vw;
+            transition: transform 0.3s;
+        }
+
+        .button:hover {
+            transform: scale(2);
+        }
+
+        .red { background-color: red; }
+        .yellow { background-color: yellow; }
+        .green { background-color: green; }
+        .cyan { background-color: cyan; }
+        .blue { background-color: blue; }
+        .purple { background-color: purple; }
+    </style>
+</head>
+<body>
+    <div class="button-container" id="top-buttons">
+        <div class="button red" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button yellow" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button green" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button cyan" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button blue" onclick="changeTopColor(this.classList[1])"></div>
+        <div class="button purple" onclick="changeTopColor(this.classList[1])"></div>
+    </div>
+    <div class="button-container" id="bottom-buttons">
+        <div class="button red" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button yellow" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button green" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button cyan" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button blue" onclick="changeBottomColor(this.classList[1])"></div>
+        <div class="button purple" onclick="changeBottomColor(this.classList[1])"></div>
+    </div>
+
+    <script>
+        let topColor = 'black';
+        let bottomColor = 'white';
+
+        function changeTopColor(color) {
+            topColor = color;
+            document.body.style.background = `linear-gradient(to bottom, ${topColor}, ${bottomColor})`;
+        }
+
+        function changeBottomColor(color) {
+            bottomColor = color;
+            document.body.style.background = `linear-gradient(to bottom, ${topColor}, ${bottomColor})`;
+        }
+    </script>
+</body>
+</html>
+```

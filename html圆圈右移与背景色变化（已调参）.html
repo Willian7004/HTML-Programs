@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Moving Circles</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        body {
+            margin: 0;
+            background-color: #fff; /* 初始背景颜色为白色 */
+        }
+        
+        .circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body id="body">
+    <script src="script.js"></script>
+
+    <script>
+        const body = document.getElementById('body');
+        const screenWidth = window.innerWidth;
+        
+        function generateRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+        
+        function generateCircle() {
+            const circle = document.createElement('div');
+            circle.className = 'circle';
+        
+            // Set random top position
+            circle.style.top = `${Math.random() * (window.innerHeight - 50)}px`;
+        
+            // Set random color and body background to the same color
+            const color = generateRandomColor();
+            circle.style.backgroundColor = color;
+            body.style.backgroundColor = color;
+        
+            body.appendChild(circle);
+        
+            let leftPosition = 0;
+            const intervalId = setInterval(() => {
+                leftPosition += 150/ 20 ; // Speed adjustment to move at 150px per second
+                circle.style.left = `${leftPosition}px`;
+        
+                if (leftPosition >= screenWidth) {
+                    clearInterval(intervalId);
+                    body.removeChild(circle);
+                }
+            }, 10);
+        
+        }
+        
+        // Generate new circle every 0.2 seconds
+        setInterval(generateCircle, 200);
+    </script>
+</body>
+
+</html>

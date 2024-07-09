@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Buttons</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="scripts.js"></script>
+
+    <style>
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+        }
+        
+        .row1 {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          left: 13vw;
+          gap: 13vw;
+          position: fixed;
+          top: 4vw;
+        }
+        
+        .row2 {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          left: 13vw;
+          gap: 13vw;
+          position: fixed;
+          bottom: 4vw;
+        }
+        
+        .circle-button {
+          width: 16vw;
+          height: 16vw;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+        }
+        
+        .red { background-color: red; }
+        .yellow { background-color: yellow; }
+        .green { background-color: green; }
+        .cyan { background-color: cyan; }
+        .blue { background-color: blue; }
+        .purple { background-color: purple; }
+        
+        .circle-button:hover {
+          width: 24vw;
+          height: 24vw;
+          background-color: black;
+        }
+        
+        /* active state */
+        .circle-button.active {
+          width: 100vw;
+          height: 100vw;
+          position: fixed;
+          left: 0;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          z-index: -1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 2 rows, 3 columns -->
+    <div class="button-group">
+        <!-- First row -->
+        <div class="row1">
+            <div class="circle-button red"></div>
+            <div class="circle-button yellow"></div>
+            <div class="circle-button green"></div>
+        </div>
+
+        <!-- Second row -->
+        <div class="row2">
+            <div class="circle-button cyan"></div>
+            <div class="circle-button blue"></div>
+            <div class="circle-button purple"></div>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function() {
+        
+            $('.circle-button').on('click', function() {
+                $(this).addClass('active');
+        
+                // Change body background to the color of the clicked button.
+                $('body').css('background-color', $(this).css('background-color'));
+        
+                // Remove active class on other buttons
+                $('.circle-button').not(this).removeClass('active');
+            });
+        
+        });
+    </script>
+</body>
+
+</html>

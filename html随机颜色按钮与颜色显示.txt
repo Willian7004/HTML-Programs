@@ -1,0 +1,89 @@
+>>> 使用html把页面横向和纵向各进行5等分并创建按钮，每个按钮填充随机颜色并用黑色文字显示颜色的十六进制值。鼠标移动到按钮
+... 上时按钮变成白色，点击按钮时按钮变成随机颜色并显示新的颜色值
+为了实现这个需求，我们可以使用HTML、CSS和JavaScript来构建一个动态的5x5网格布局，其中每个单元格都是一个按钮，并且在用
+户交互时改变颜色。下面是一个详细的代码示例：
+
+### HTML (index.html)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Grid</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="grid"></div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
+```
+
+### CSS (styles.css)
+
+```css
+#grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+}
+
+.button {
+    padding: 20px;
+    text-align: center;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: white;
+}
+```
+
+### JavaScript (scripts.js)
+
+```javascript
+document.addEventListener('DOMContentLoaded', function () {
+    const grid = document.getElementById('grid');
+
+    // 生成5x5的网格，每个单元格是一个按钮
+    for(let i = 0; i < 25; i++) {
+        let button = document.createElement('button');
+        button.className = 'button';
+        button.style.backgroundColor = randomColor();
+        button.textContent = button.style.backgroundColor;
+
+        // 鼠标移入时改变颜色为白色
+        button.addEventListener('mouseover', function () {
+            this.style.backgroundColor = "white";
+            this.textContent = "";
+        });
+
+        // 点击按钮后生成新的随机颜色并更新文本内容
+        button.addEventListener('click', function () {
+            let newColor = randomColor();
+            this.style.backgroundColor = newColor;
+            this.textContent = newColor;
+        });
+
+        grid.appendChild(button);
+    }
+
+    // 生成随机颜色的函数
+    function randomColor() {
+        return '#' + Math.floor(Math.random()*16777215).toString(16);
+    }
+});
+```
+
+这个代码实现了以下功能：
+- 页面加载时，自动创建一个包含25个按钮（形成5x5网格）的`div`。
+- 每个按钮都有随机颜色背景，并显示其十六进制颜色值。
+- 当鼠标悬停在按钮上时，按钮变为白色且文本内容清空。
+- 点击按钮会重新生成一个新的随机颜色并更新显示。
+
+这个项目涵盖了基本的DOM操作、事件监听器以及样式处理。

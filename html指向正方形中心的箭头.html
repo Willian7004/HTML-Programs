@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>文档标题</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        .square-icons {
+            position: relative;
+            width: 200px; /* 可以根据需要调整大小 */
+            height: 200px;
+        }
+        
+        .square-icons i {
+            color: #333;
+            font-size: 50px; /* 调整图标大小 */
+            position: absolute;
+        }
+        
+        /* 定位四个箭头 */
+        .top {
+            top: 0;
+            left: calc(50% - 1em); /* 计算中间位置并调整以保持图标居中 */
+        }
+        .right {
+            right: 0;
+            top: calc(50% - 1em);
+        }
+        .bottom {
+            bottom: 0;
+            left: calc(50% - 1em);
+        }
+        .left {
+            left: 0;
+            top: calc(50% - 1em);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="square-icons">
+        <i class="fas fa-arrow-right top"></i>
+        <i class="fas fa-arrow-down right"></i>
+        <i class="fas fa-arrow-left bottom"></i>
+        <i class="fas fa-arrow-up left"></i>
+    </div>
+</body>
+
+</html>

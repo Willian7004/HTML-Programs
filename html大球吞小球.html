@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Circles</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const circles = [];
+        const redCircle = {
+            x: 0,
+            y: 0,
+            radius: 36,
+            color: 'red',
+            speed: 0
+        };
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function createCircle() {
+            let circle;
+            let valid = false;
+            while (!valid) {
+                circle = {
+                    x: Math.random() * (canvas.width - 96) + 48,
+                    y: Math.random() * (canvas.height - 96) + 48,
+                    radius: 24,
+                    color: getRandomColor(),
+                    dx: Math.random() * 8 - 4,
+                    dy: Math.random() * 8 - 4
+                };
+                valid = true;
+                for (let c of circles) {
+                    if (Math.sqrt((circle.x - c.x) ** 2 + (circle.y - c.y) ** 2) < 96) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+            return circle;
+        }
+
+        for (let i = 0; i < 30; i++) {
+            circles.push(createCircle());
+        }
+
+        function drawCircle(circle) {
+            ctx.beginPath();
+            ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+            ctx.fillStyle = circle.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function updateCircle(circle) {
+            circle.x += circle.dx;
+            circle.y += circle.dy;
+
+            if (circle.x + circle.radius > canvas.width || circle.x - circle.radius < 0) {
+                circle.dx = -circle.dx;
+            }
+            if (circle.y + circle.radius > canvas.height || circle.y - circle.radius < 0) {
+                circle.dy = -circle.dy;
+            }
+        }
+
+        function checkCollision(circle1, circle2) {
+            const dx = circle1.x - circle2.x;
+            const dy = circle1.y - circle2.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < circle1.radius + circle2.radius;
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let circle of circles) {
+                updateCircle(circle);
+                drawCircle(circle);
+            }
+
+            for (let i = circles.length - 1; i >= 0; i--) {
+                if (checkCollision(redCircle, circles[i])) {
+                    circles.splice(i, 1);
+                    circles.push(createCircle());
+                }
+            }
+
+            drawCircle(redCircle);
+
+            requestAnimationFrame(animate);
+        }
+
+        canvas.addEventListener('mousemove', (event) => {
+            redCircle.x = event.clientX;
+            redCircle.y = event.clientY;
+        });
+
+        animate();
+    </script>
+</body>
+</html>

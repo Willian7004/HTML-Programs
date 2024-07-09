@@ -1,0 +1,99 @@
+>>> 使用html5制作以下程序：一个绿色到蓝色渐变的边长50像素的正方形跟随鼠标，点击鼠标在当前位置生成随机颜色的边长50像素的正方形
+要创建这样一个HTML5程序，你可以结合使用HTML、CSS和JavaScript。首先，我们需要创建基本的HTML结构，并添加一个canvas元素
+，然后用CSS来设置样式，最后通过JavaScript实现功能。
+
+下面是一个完整的代码示例：
+
+### HTML
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gradient Square Follows Cursor</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="myCanvas"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+### CSS (styles.css)
+
+```css
+#myCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+```
+
+### JavaScript (script.js)
+
+```javascript
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let mouseX, mouseY;
+let squares = [];
+
+function getRandomColor() {
+    let letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+function drawGradientSquare(x, y) {
+    ctx.beginPath();
+    ctx.rect(x - 25, y - 25, 50, 50);
+    ctx.fillStyle = `linear-gradient(to right, green, blue)`;
+    ctx.fill();
+}
+
+function drawRandomSquare(x, y) {
+    ctx.beginPath();
+    ctx.rect(x - 25, y - 25, 50, 50);
+    ctx.fillStyle = getRandomColor();
+    ctx.fill();
+}
+
+document.addEventListener('mousemove', function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+document.addEventListener('mousedown', function() {
+    squares.push({x: mouseX, y: mouseY});
+});
+
+function animate() {
+    requestAnimationFrame(animate);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawGradientSquare(mouseX, mouseY);
+
+    for (let i = 0; i < squares.length; i++) {
+        let square = squares[i];
+        drawRandomSquare(square.x, square.y);
+    }
+}
+
+animate();
+```
+
+这个代码创建了一个canvas元素，当鼠标在页面上移动时，一个绿色到蓝色渐变的正方形会跟随鼠标。当你点击鼠标时，在当前位置
+生成一个随机颜色的50x50像素的正方形。请注意，为了使这个效果更流畅或适用于不同尺寸和分辨率的屏幕，你可能需要根据实际
+应用情况调整canvas大小和坐标计算方式。
+
+以上代码示例在现代浏览器上应该能正常工作。

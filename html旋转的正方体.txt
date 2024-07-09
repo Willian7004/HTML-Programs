@@ -1,0 +1,61 @@
+好的，以下是一个完整的HTML文件，使用Three.js库创建一个边长为50的绕x轴旋转的红色正方体和一个边长为50的绕y轴旋转的蓝色正方体。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Rotating Cubes</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Red cube (rotating around x-axis)
+    const geometryRed = new THREE.BoxGeometry(50, 50, 50);
+    const materialRed = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const cubeRed = new THREE.Mesh(geometryRed, materialRed);
+    cubeRed.position.x = -75;
+    scene.add(cubeRed);
+
+    // Blue cube (rotating around y-axis)
+    const geometryBlue = new THREE.BoxGeometry(50, 50, 50);
+    const materialBlue = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const cubeBlue = new THREE.Mesh(geometryBlue, materialBlue);
+    cubeBlue.position.x = 75;
+    scene.add(cubeBlue);
+
+    // Camera position
+    camera.position.z = 200;
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate red cube around x-axis
+        cubeRed.rotation.x += 0.01;
+
+        // Rotate blue cube around y-axis
+        cubeBlue.rotation.y += 0.01;
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+</body>
+</html>
+```
+
+这个HTML文件包含了一个基本的Three.js场景设置，创建了两个正方体，一个红色正方体绕x轴旋转，一个蓝色正方体绕y轴旋转。两个正方体分别位于场景的两侧，以便更好地观察它们的旋转效果。

@@ -1,0 +1,113 @@
+》使用html获取窗口尺寸，把页面分为边长10像素的正方形，每个正方形填充随机颜色且确保填充的颜色的r、g、b、值均大于85，每过一秒钟重新进行填充。在页面中心用黑色数字显示时间，数字高度为页面高度50%。在距页面底部距离为页面高度10%处用黑色数字显示日期，数字高度为页面高度的8%。
+
+为了实现这个功能，我们需要使用HTML、CSS和JavaScript。以下是一个完整的代码示例：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Color Grid</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 10px);
+            grid-template-rows: repeat(auto-fill, 10px);
+            width: 100vw;
+            height: 100vh;
+        }
+        .cell {
+            width: 10px;
+            height: 10px;
+        }
+        .time, .date {
+            position: absolute;
+            color: black;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+        }
+        .time {
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 50vh;
+        }
+        .date {
+            bottom: 10%;
+            font-size: 8vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid"></div>
+    <div class="time"></div>
+    <div class="date"></div>
+    <script>
+        function getRandomColor() {
+            let r, g, b;
+            do {
+                r = Math.floor(Math.random() * 256);
+                g = Math.floor(Math.random() * 256);
+                b = Math.floor(Math.random() * 256);
+            } while (r < 85 || g < 85 || b < 85);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function updateGrid() {
+            const grid = document.querySelector('.grid');
+            grid.innerHTML = '';
+            const width = Math.floor(window.innerWidth / 10);
+            const height = Math.floor(window.innerHeight / 10);
+            for (let i = 0; i < width * height; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.style.backgroundColor = getRandomColor();
+                grid.appendChild(cell);
+            }
+        }
+
+        function updateTimeAndDate() {
+            const now = new Date();
+            const timeElement = document.querySelector('.time');
+            const dateElement = document.querySelector('.date');
+            timeElement.textContent = now.toLocaleTimeString();
+            dateElement.textContent = now.toLocaleDateString();
+        }
+
+        function init() {
+            updateGrid();
+            updateTimeAndDate();
+            setInterval(updateGrid, 1000);
+            setInterval(updateTimeAndDate, 1000);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
+```
+
+### 解释
+1. **HTML结构**:
+    - 一个`div`元素用于网格（`.grid`）。
+    - 两个`div`元素分别用于显示时间和日期（`.time`和`.date`）。
+
+2. **CSS样式**:
+    - 设置`body`和`html`为全屏无滚动。
+    - 使用CSS Grid布局创建网格，每个单元格大小为10x10像素。
+    - 设置时间和日期的位置和字体大小。
+
+3. **JavaScript功能**:
+    - `getRandomColor`函数生成随机颜色，确保RGB值均大于85。
+    - `updateGrid`函数更新网格，创建并填充随机颜色的单元格。
+    - `updateTimeAndDate`函数更新时间和日期的显示。
+    - `init`函数初始化页面，并设置每秒更新一次网格和时间日期。
+
+这个代码会在页面加载时初始化，并每秒钟更新一次网格颜色、时间和日期。

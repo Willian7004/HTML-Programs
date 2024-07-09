@@ -1,0 +1,107 @@
+>>> 使用html5在页面随机位置生成20个直径为50像素的随机颜色的圆形，生成一个跟随鼠标移动的边长64像素的黑色正方形，鼠标移动
+... 到圆形上时圆形消失并在随机位置生成同样的圆形
+要实现这个需求，可以利用HTML、CSS和JavaScript来完成。以下是一个简单的示例代码：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Shapes</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        .circle {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .square {
+            position: absolute;
+            width: 64px;
+            height: 64px;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+<script>
+    window.onload = function() {
+        // 创建20个随机颜色的圆
+        for (let i = 0; i < 20; i++) {
+            createRandomCircle();
+        }
+
+        let squareElement = document.createElement('div');
+        squareElement.classList.add('square');
+
+        document.body.appendChild(squareElement);
+
+        let mouseX, mouseY;
+
+        // 鼠标移动时更新正方形位置
+        document.addEventListener('mousemove', function(event) {
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+            squareElement.style.left = (mouseX - 32) + 'px';
+            squareElement.style.top = (mouseY - 32) + 'px';
+
+            // 检查鼠标是否在圆上
+            let circles = document.querySelectorAll('.circle');
+            for (let i = 0; i < circles.length; i++) {
+                if (isCollision(circles[i], mouseX, mouseY)) {
+                    removeAndCreateCircle(circles[i]);
+                }
+            }
+        });
+
+        // 随机生成圆的位置和颜色
+        function createRandomCircle() {
+            let circleElement = document.createElement('div');
+            circleElement.classList.add('circle');
+            circleElement.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            circleElement.style.top = Math.random() * (window.innerHeight - 50) + 'px';
+            circleElement.style.backgroundColor = getRandomColor();
+            document.body.appendChild(circleElement);
+        }
+
+        // 检查鼠标是否在圆上
+        function isCollision(element, mx, my) {
+            let rect = element.getBoundingClientRect();
+            return Math.pow(mx - rect.left - 25, 2) + Math.pow(my - rect.top - 25, 2) < Math.pow(25, 2);
+        }
+
+        // 移除当前圆并在随机位置生成新圆
+        function removeAndCreateCircle(element) {
+            document.body.removeChild(element);
+            createRandomCircle();
+        }
+
+        // 随机颜色函数
+        function getRandomColor() {
+            let letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    };
+</script>
+</body>
+</html>
+```
+
+这段代码中，我们使用了事件监听器来在页面加载后生成随机位置的圆，并创建一个跟随鼠标移动的正方形。当鼠标移到圆形上时，
+会检测到碰撞并重新生成一个新的圆。
+
+请注意，在实际部署或生产环境中使用此代码前，可能需要对浏览器兼容性和性能进行适当测试和调整。

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Rotating Cubes</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Red cube (rotating around x-axis)
+    const geometryRed = new THREE.BoxGeometry(50, 50, 50);
+    const materialRed = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const cubeRed = new THREE.Mesh(geometryRed, materialRed);
+    cubeRed.position.x = -75;
+    scene.add(cubeRed);
+
+    // Blue cube (rotating around y-axis)
+    const geometryBlue = new THREE.BoxGeometry(50, 50, 50);
+    const materialBlue = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const cubeBlue = new THREE.Mesh(geometryBlue, materialBlue);
+    cubeBlue.position.x = 75;
+    scene.add(cubeBlue);
+
+    // Camera position
+    camera.position.z = 200;
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate red cube around x-axis
+        cubeRed.rotation.x += 0.01;
+
+        // Rotate blue cube around y-axis
+        cubeBlue.rotation.y += 0.01;
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+</body>
+</html>

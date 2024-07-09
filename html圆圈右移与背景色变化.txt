@@ -1,0 +1,97 @@
+>>> 使用html5，每0.2秒在页面左侧随机高度生成一个随机颜色的直径50像素的圆形，每个圆形以每秒150像素向页面右侧移动，圆形到
+... 达页面右侧后消失，并把页面背景改为该圆形的颜色
+要实现这个场景，我们可以通过 HTML、CSS 和 JavaScript 来完成。以下是一个基本的示例代码，它实现了你的需求：
+
+### HTML 结构
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Moving Circles</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body id="body">
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+### CSS 样式
+
+```css
+/* styles.css */
+body {
+    margin: 0;
+    background-color: #fff; /* 初始背景颜色为白色 */
+}
+
+.circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+}
+```
+
+### JavaScript 动态生成圆形和移动逻辑
+
+```javascript
+// script.js
+const body = document.getElementById('body');
+const screenWidth = window.innerWidth;
+
+function generateRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+function generateCircle() {
+    const circle = document.createElement('div');
+    circle.className = 'circle';
+
+    // Set random top position
+    circle.style.top = `${Math.random() * (window.innerHeight - 50)}px`;
+
+    // Set random color and body background to the same color
+    const color = generateRandomColor();
+    circle.style.backgroundColor = color;
+    body.style.backgroundColor = color;
+
+    body.appendChild(circle);
+
+    let leftPosition = 0;
+    const intervalId = setInterval(() => {
+        leftPosition += 150 / (60/0.2); // Speed adjustment to move at 150px per second
+        circle.style.left = `${leftPosition}px`;
+
+        if (leftPosition >= screenWidth) {
+            clearInterval(intervalId);
+            body.removeChild(circle);
+        }
+    }, 200);
+
+}
+
+// Generate new circle every 0.2 seconds
+setInterval(generateCircle, 200);
+```
+
+### 解释：
+
+1. **HTML**: 创建一个基本的页面结构。
+2. **CSS**: 定义 `.circle` 类，用于创建圆形元素，并设置一些初始样式。
+3. **JavaScript**:
+   - `generateRandomColor()`: 功能函数生成随机颜色。
+   - `generateCircle()`: 主要功能函数。它创建一个新的圆形 DOM 元素，设置随机位置和颜色，然后添加到页面上。同时开始一
+个定时器来移动该元素，并在到达右侧边界后清除该元素。
+   - 使用 `setInterval` 每 0.2 秒调用一次 `generateCircle()`。
+
+这样，你就有了一个动态的网页，其中不断有圆形从左侧以随机颜色出现并移动到右侧。

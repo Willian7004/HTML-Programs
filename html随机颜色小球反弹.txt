@@ -1,0 +1,117 @@
+>>> 使用html5生成10个直径50像素的随机颜色圆形，并且每两个圆形的间距大于50像素。每个圆形向随机方向以每秒150像素的速度开始
+... 移动，碰到页面边缘或者其它圆形时反弹。
+ 要实现这个功能，我们需要结合HTML5和JavaScript来创建一个动态的网页应用。以下是一个简单的示例代码，展示了如何使用
+HTML5 Canvas和JavaScript生成并控制这些圆形的移动：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Moving Circles</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="myCanvas" width="800" height="600"></canvas>
+<script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+    const circles = [];
+    const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'brown', 'cyan', 'magenta'];
+
+    class Circle {
+        constructor(x, y, dx, dy, radius, color) {
+            this.x = x;
+            this.y = y;
+            this.dx = dx;
+            this.dy = dy;
+            this.radius = radius;
+            this.color = color;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        update() {
+            if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                this.dx = -this.dx;
+            }
+            if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                this.dy = -this.dy;
+            }
+
+            for (let i = 0; i < circles.length; i++) {
+                if (this === circles[i]) continue;
+                if (this.checkCollision(circles[i])) {
+                    this.dx = -this.dx;
+                    this.dy = -this.dy;
+                    break;
+                }
+            }
+
+            this.x += this.dx;
+            this.y += this.dy;
+            this.draw();
+        }
+
+        checkCollision(other) {
+            const dx = this.x - other.x;
+            const dy = this.y - other.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < (this.radius + other.radius);
+        }
+    }
+
+    function init() {
+        for (let i = 0; i < 10; i++) {
+            let radius = 50;
+            let x = Math.random() * (canvas.width - radius * 2) + radius;
+            let y = Math.random() * (canvas.height - radius * 2) + radius;
+            let dx = (Math.random() - 0.5) * 2;
+            let dy = (Math.random() - 0.5) * 2;
+            let color = colors[i];
+
+            if (circles.some(circle => circle.checkCollision(new Circle(x, y, dx, dy, radius, color)))) {
+                i--;
+                continue;
+            }
+
+            circles.push(new Circle(x, y, dx * 150, dy * 150, radius, color));
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < circles.length; i++) {
+            circles[i].update();
+        }
+    }
+
+    init();
+    animate();
+</script>
+</body>
+</html>
+```
+
+### 代码解释：
+1. **HTML部分**：创建一个Canvas元素，用于绘制圆形。
+2. **CSS部分**：简单地为Canvas添加了一个边框。
+3. **JavaScript部分**：
+   - `Circle`类定义了圆形的属性和方法，包括位置、速度、颜色和碰撞检测等。
+   - `init()`函数初始化10个圆形，确保它们不重叠。
+   - `animate()`函数负责更新每个圆形的位置并重新绘制Canvas。
+   - 使用`requestAnimationFrame()`来实现流畅的动画效果。
+
+这个代码示例提供了一个基本的框架，你可以根据需要进一步优化和扩展功能，比如增加更多的交互性或视觉效果。

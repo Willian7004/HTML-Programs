@@ -1,0 +1,95 @@
+》创建一个html页面，页面左半部分可以输入html程序，并实现代码高亮显示，在页面右半部分运行在页面左半部分输入的程序。在页面左上角添加一个下载建，可以把在页面左半部分创建的程序保存到本地。
+
+要创建一个包含代码编辑器和实时预览功能的HTML页面，并添加下载功能，可以使用以下技术和库：
+
+1. **CodeMirror**：用于代码编辑和语法高亮。
+2. **HTML5**：用于创建页面结构和元素。
+3. **JavaScript**：用于实现实时预览和下载功能。
+
+以下是一个示例代码，展示了如何实现这个功能：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/htmlmixed/htmlmixed.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        #editor {
+            width: 50%;
+            height: 100%;
+        }
+        #preview {
+            width: 50%;
+            height: 100%;
+            border: none;
+            border-left: 1px solid #ccc;
+        }
+        #downloadBtn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="downloadBtn">Download</button>
+    <textarea id="editor"></textarea>
+    <iframe id="preview"></iframe>
+
+    <script>
+        const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+            mode: 'htmlmixed',
+            lineNumbers: true,
+            theme: 'default'
+        });
+
+        editor.on('change', () => {
+            const code = editor.getValue();
+            const preview = document.getElementById('preview');
+            preview.srcdoc = code;
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const code = editor.getValue();
+            const blob = new Blob([code], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'index.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
+```
+
+### 解释
+
+1. **HTML部分**：
+    - 使用`<textarea>`作为代码编辑器。
+    - 使用`<iframe>`作为实时预览窗口。
+    - 添加一个下载按钮。
+
+2. **CSS部分**：
+    - 使用Flexbox布局使编辑器和预览窗口各占一半。
+    - 设置下载按钮的位置。
+
+3. **JavaScript部分**：
+    - 使用CodeMirror库初始化代码编辑器，并设置语法高亮为HTML。
+    - 监听编辑器的变化，实时更新预览窗口。
+    - 添加下载功能，当点击下载按钮时，将编辑器中的代码保存为HTML文件并下载。
+
+这个示例代码提供了一个基本的HTML编辑器和实时预览功能，并允许用户下载编辑的HTML代码。你可以根据需要进一步扩展和美化这个页面。
