@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; }
+        #speed { position: fixed; bottom: 20px; right: 200px; }
+        #speedLabel { position: fixed; bottom: 24px; right: 300px; color: white; }
+    </style>
+</head>
+<body>
+    <div id="speedLabel">Speed:</div>
+    <input type="number" id="speed" value="60">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, curve;
+        let controlPoints = [];
+        let spheres = [];
+        let toruses = [];
+        let cameraT = 0;
+        let speed = 60;
+
+        init();
+        animate();
+
+        function init() {
+            // 场景设置
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // 生成控制点
+            generateControlPoints(100);
+            createBezierCurve();
+            createSpheres();
+            createToruses();
+
+            // 摄像机初始位置
+            camera.position.copy(curve.getPoint(0));
+            camera.lookAt(curve.getPoint(0.01));
+
+            // 坐标轴
+            const axesHelper = new THREE.AxesHelper(50);
+            scene.add(axesHelper);
+
+            // 速度输入
+            document.getElementById('speed').addEventListener('change', function() {
+                speed = parseInt(this.value) || 60;
+            });
+        }
+
+        function generateControlPoints(count) {
+            // 第一个点
+            let prev = new THREE.Vector3(120, 0, 0);
+            controlPoints.push(prev.clone());
+
+            // 生成后续点
+            for (let i = 1; i < count; i++) {
+                let newPoint = generateValidPoint(prev, controlPoints[i-2]);
+                controlPoints.push(newPoint);
+                prev = newPoint;
+            }
+        }
+
+        function generateValidPoint(prev, prevPrev) {
+            let valid = false;
+            let newPoint;
+            while (!valid) {
+                newPoint = new THREE.Vector3().copy(prev)
+                    .add(new THREE.Vector3(
+                        Math.random()*2-1, 
+                        Math.random()*2-1, 
+                        Math.random()*2-1
+                    ).normalize().multiplyScalar(120));
+                
+                if (!prevPrev) return newPoint;  // 第二个点无需验证
+                
+                const vec1 = prev.clone().sub(prevPrev);
+                const vec2 = newPoint.clone().sub(prev);
+                valid = vec1.dot(vec2) <= 0;
+            }
+            return newPoint;
+        }
+
+        function createBezierCurve() {
+            curve = new THREE.CatmullRomCurve3(controlPoints);
+        }
+
+        function createSpheres() {
+            controlPoints.forEach(point => {
+                for (let i = 0; i < 50; i++) {
+                    const sphere = createRandomSphere(point);
+                    scene.add(sphere);
+                    spheres.push(sphere);
+                }
+            });
+        }
+
+        function createRandomSphere(center) {
+            const pos = new THREE.Vector3(
+                Math.random()*2-1,
+                Math.random()*2-1,
+                Math.random()*2-1
+            ).normalize().multiplyScalar(20 + Math.random()*60)
+             .add(center);
+
+            const geometry = new THREE.SphereGeometry(16 + Math.random()*9);
+            const material = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(Math.random(), Math.random(), Math.random())
+            });
+            return new THREE.Mesh(geometry, material);
+        }
+
+        function createToruses() {
+            const totalLength = curve.getLength();
+            for (let s = 0; s < totalLength; s += 8) {
+                const t = curve.getUtoTmapping(s / totalLength);
+                const pos = curve.getPoint(t);
+                const tangent = curve.getTangent(t).normalize();
+                
+                const geometry = new THREE.TorusGeometry(23, 3, 16, 100);
+                const material = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color(Math.random(), Math.random(), Math.random())
+                });
+                const torus = new THREE.Mesh(geometry, material);
+                torus.position.copy(pos);
+                torus.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+                scene.add(torus);
+                toruses.push(torus);
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = speed / curve.getLength() / 60;
+
+            // 更新摄像机位置
+            cameraT = (cameraT + delta + 1) % 1;
+            const camPos = curve.getPoint(cameraT);
+            const tangent = curve.getTangent(cameraT).normalize();
+            
+            camera.position.copy(camPos);
+            camera.lookAt(camPos.clone().add(tangent));
+
+            // 更新可见物体（示例逻辑）
+            spheres.forEach(sphere => sphere.visible = 
+                sphere.position.distanceTo(camPos) < 1200
+            );
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
