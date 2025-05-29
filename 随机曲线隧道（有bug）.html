@@ -1,161 +1,535 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贝塞尔曲线动画系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <style>
-        body { margin: 0; }
-        #speed { position: fixed; bottom: 20px; right: 200px; }
-        #speedLabel { position: fixed; bottom: 24px; right: 300px; color: white; }
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: white;
+        }
+        canvas { 
+            display: block; 
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 300px;
+            backdrop-filter: blur(5px);
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        #axis-display {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            width: 120px;
+            height: 120px;
+            backdrop-filter: blur(5px);
+        }
+        .axis-label {
+            position: absolute;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .axis-line {
+            position: absolute;
+            transform-origin: 0 0;
+        }
+        input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #3498db;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            margin-left: 10px;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        h3 {
+            margin-top: 0;
+            color: #3498db;
+            border-bottom: 1px solid #3498db;
+            padding-bottom: 5px;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .slider-container input {
+            flex: 1;
+            margin: 0 10px;
+        }
+        .header {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-bottom: 2px solid #3498db;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #3498db;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+        }
+        .header p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
-    <div id="speedLabel">Speed:</div>
-    <input type="number" id="speed" value="60">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <div class="header">
+        <h1>贝塞尔曲线动画系统</h1>
+        <p>Three.js实现的动态曲线场景 | 摄像机沿曲线移动 | 随机球体和圆环</p>
+    </div>
+    
+    <div id="info">
+        <h3>系统说明</h3>
+        <p>• 红色球体：随机生成在控制点周围的球体</p>
+        <p>• 金色圆环：沿贝塞尔曲线均匀分布的圆环</p>
+        <p>• 蓝色曲线：由控制点生成的贝塞尔曲线</p>
+        <p>• 绿色方块：摄像机沿曲线移动</p>
+        <p>• 系统自动移除超出摄像机720单位外的物体</p>
+    </div>
+    
+    <div id="controls">
+        <h3>摄像机控制</h3>
+        <label>
+            移动速度: 
+            <input type="number" id="speedInput" value="60" min="-120" max="120">
+        </label>
+        <div class="slider-container">
+            <span>-120</span>
+            <input type="range" id="speedSlider" min="-120" max="120" value="60">
+            <span>120</span>
+        </div>
+        <button id="resetBtn">重置场景</button>
+        <button id="toggleBtn">暂停/继续</button>
+    </div>
+    
+    <div id="axis-display">
+        <h3 style="text-align: center; margin-bottom: 30px;">坐标轴</h3>
+        <div class="axis-line" style="width: 50px; height: 2px; background: red; top: 60px; left: 60px;"></div>
+        <div class="axis-line" style="width: 2px; height: 50px; background: green; top: 60px; left: 60px;"></div>
+        <div class="axis-line" style="width: 35px; height: 2px; background: blue; top: 60px; left: 60px; transform: rotate(-45deg); transform-origin: left;"></div>
+        <div class="axis-label" style="top: 55px; left: 115px; color: red;">X</div>
+        <div class="axis-label" style="top: 15px; left: 65px; color: green;">Y</div>
+        <div class="axis-label" style="top: 35px; left: 100px; color: blue;">Z</div>
+    </div>
+
     <script>
-        let scene, camera, renderer, curve;
-        let controlPoints = [];
-        let spheres = [];
-        let toruses = [];
-        let cameraT = 0;
+        // 场景初始化
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a2a);
+        scene.fog = new THREE.Fog(0x0a0a2a, 500, 1500);
+        
+        // 渲染器
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+        
+        // 相机
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 3000);
+        camera.position.set(0, 200, 500);
+        
+        // 轨道控制器
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        
+        // 光源
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        
+        const pointLight = new THREE.PointLight(0x3498db, 1, 500);
+        pointLight.position.set(0, 100, 0);
+        scene.add(pointLight);
+        
+        // 全局变量
+        let curve, curvePoints = [];
+        const spheres = [];
+        const toruses = [];
+        const controlPoints = [];
+        let cameraPositionOnCurve = 0;
         let speed = 60;
-
-        init();
-        animate();
-
-        function init() {
-            // 场景设置
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            // 生成控制点
-            generateControlPoints(100);
-            createBezierCurve();
-            createSpheres();
-            createToruses();
-
-            // 摄像机初始位置
-            camera.position.copy(curve.getPoint(0));
-            camera.lookAt(curve.getPoint(0.01));
-
-            // 坐标轴
-            const axesHelper = new THREE.AxesHelper(50);
-            scene.add(axesHelper);
-
-            // 速度输入
-            document.getElementById('speed').addEventListener('change', function() {
-                speed = parseInt(this.value) || 60;
+        let lastTime = 0;
+        let animationRunning = true;
+        
+        // 初始化场景
+        initScene();
+        
+        // 场景初始化函数
+        function initScene() {
+            // 清除现有对象
+            clearScene();
+            
+            // 创建初始控制点
+            createInitialControlPoints();
+            
+            // 生成贝塞尔曲线
+            generateBezierCurve();
+            
+            // 生成球体
+            generateSpheres();
+            
+            // 生成圆环
+            generateToruses();
+            
+            // 创建摄像机指示器
+            createCameraIndicator();
+            
+            // 重置摄像机位置
+            cameraPositionOnCurve = 0;
+            updateCameraPosition();
+        }
+        
+        // 清除场景中的对象
+        function clearScene() {
+            // 移除球体
+            spheres.forEach(sphere => scene.remove(sphere));
+            spheres.length = 0;
+            
+            // 移除圆环
+            toruses.forEach(torus => scene.remove(torus));
+            toruses.length = 0;
+            
+            // 移除控制点
+            controlPoints.forEach(point => {
+                if (point.helper) scene.remove(point.helper);
             });
+            controlPoints.length = 0;
+            
+            // 移除曲线
+            if (curve) {
+                scene.remove(curve);
+            }
         }
-
-        function generateControlPoints(count) {
-            // 第一个点
-            let prev = new THREE.Vector3(120, 0, 0);
-            controlPoints.push(prev.clone());
-
-            // 生成后续点
-            for (let i = 1; i < count; i++) {
-                let newPoint = generateValidPoint(prev, controlPoints[i-2]);
+        
+        // 创建初始控制点
+        function createInitialControlPoints() {
+            // 第一个控制点
+            const firstPoint = createControlPoint(new THREE.Vector3(0, 0, 0), 120);
+            controlPoints.push(firstPoint);
+            
+            // 生成后续控制点
+            for (let i = 0; i < 10; i++) {
+                const lastPoint = controlPoints[controlPoints.length - 1];
+                const newPoint = createNextControlPoint(lastPoint);
                 controlPoints.push(newPoint);
-                prev = newPoint;
             }
         }
-
-        function generateValidPoint(prev, prevPrev) {
-            let valid = false;
+        
+        // 创建控制点
+        function createControlPoint(center, distance) {
+            // 随机方向
+            const phi = Math.acos(2 * Math.random() - 1);
+            const theta = Math.random() * Math.PI * 2;
+            
+            // 计算位置
+            const x = center.x + distance * Math.sin(phi) * Math.cos(theta);
+            const y = center.y + distance * Math.sin(phi) * Math.sin(theta);
+            const z = center.z + distance * Math.cos(phi);
+            
+            const position = new THREE.Vector3(x, y, z);
+            
+            // 创建控制点可视化
+            const geometry = new THREE.SphereGeometry(5, 16, 16);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+            const helper = new THREE.Mesh(geometry, material);
+            helper.position.copy(position);
+            scene.add(helper);
+            
+            return { position, helper };
+        }
+        
+        // 创建下一个控制点（满足角度条件）
+        function createNextControlPoint(lastPoint) {
+            const lastPosition = lastPoint.position;
             let newPoint;
-            while (!valid) {
-                newPoint = new THREE.Vector3().copy(prev)
-                    .add(new THREE.Vector3(
-                        Math.random()*2-1, 
-                        Math.random()*2-1, 
-                        Math.random()*2-1
-                    ).normalize().multiplyScalar(120));
+            let valid = false;
+            let attempts = 0;
+            
+            // 确保新点与上一点的连线夹角不小于90度
+            while (!valid && attempts < 100) {
+                newPoint = createControlPoint(lastPosition, 120);
                 
-                if (!prevPrev) return newPoint;  // 第二个点无需验证
+                if (controlPoints.length > 1) {
+                    const prevPoint = controlPoints[controlPoints.length - 2].position;
+                    const vec1 = new THREE.Vector3().subVectors(lastPosition, prevPoint);
+                    const vec2 = new THREE.Vector3().subVectors(newPoint.position, lastPosition);
+                    
+                    // 计算夹角（点积）
+                    const angle = vec1.angleTo(vec2);
+                    
+                    // 确保夹角不小于90度（π/2弧度）
+                    if (angle >= Math.PI / 2) {
+                        valid = true;
+                    }
+                } else {
+                    // 第一个点没有前一个点，直接有效
+                    valid = true;
+                }
                 
-                const vec1 = prev.clone().sub(prevPrev);
-                const vec2 = newPoint.clone().sub(prev);
-                valid = vec1.dot(vec2) <= 0;
+                attempts++;
             }
+            
             return newPoint;
         }
-
-        function createBezierCurve() {
-            curve = new THREE.CatmullRomCurve3(controlPoints);
+        
+        // 生成贝塞尔曲线
+        function generateBezierCurve() {
+            // 获取控制点位置
+            const points = controlPoints.map(p => p.position);
+            
+            // 创建Catmull-Rom曲线（一种样条曲线）
+            curve = new THREE.CatmullRomCurve3(points);
+            curve.curveType = 'centripetal';
+            curve.tension = 0.5;
+            
+            // 生成曲线点
+            curvePoints = curve.getPoints(500);
+            
+            // 创建曲线可视化
+            const curveGeometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
+            const curveMaterial = new THREE.LineBasicMaterial({ color: 0x3498db });
+            const curveObject = new THREE.Line(curveGeometry, curveMaterial);
+            scene.add(curveObject);
         }
-
-        function createSpheres() {
+        
+        // 生成球体
+        function generateSpheres() {
             controlPoints.forEach(point => {
                 for (let i = 0; i < 50; i++) {
-                    const sphere = createRandomSphere(point);
+                    // 随机距离 (20-80)
+                    const distance = 20 + Math.random() * 60;
+                    
+                    // 随机方向
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    const theta = Math.random() * Math.PI * 2;
+                    
+                    // 计算位置
+                    const x = point.position.x + distance * Math.sin(phi) * Math.cos(theta);
+                    const y = point.position.y + distance * Math.sin(phi) * Math.sin(theta);
+                    const z = point.position.z + distance * Math.cos(phi);
+                    
+                    // 随机大小 (16-24)
+                    const size = 16 + Math.floor(Math.random() * 9);
+                    
+                    // 随机颜色
+                    const color = new THREE.Color(Math.random(), Math.random(), Math.random());
+                    
+                    // 创建球体
+                    const geometry = new THREE.SphereGeometry(size / 2, 16, 16);
+                    const material = new THREE.MeshStandardMaterial({ 
+                        color: color,
+                        metalness: 0.3,
+                        roughness: 0.4
+                    });
+                    const sphere = new THREE.Mesh(geometry, material);
+                    sphere.position.set(x, y, z);
+                    
+                    // 添加到场景和数组
                     scene.add(sphere);
                     spheres.push(sphere);
                 }
             });
         }
-
-        function createRandomSphere(center) {
-            const pos = new THREE.Vector3(
-                Math.random()*2-1,
-                Math.random()*2-1,
-                Math.random()*2-1
-            ).normalize().multiplyScalar(20 + Math.random()*60)
-             .add(center);
-
-            const geometry = new THREE.SphereGeometry(16 + Math.random()*9);
-            const material = new THREE.MeshBasicMaterial({
-                color: new THREE.Color(Math.random(), Math.random(), Math.random())
-            });
-            return new THREE.Mesh(geometry, material);
-        }
-
-        function createToruses() {
-            const totalLength = curve.getLength();
-            for (let s = 0; s < totalLength; s += 8) {
-                const t = curve.getUtoTmapping(s / totalLength);
-                const pos = curve.getPoint(t);
-                const tangent = curve.getTangent(t).normalize();
+        
+        // 生成圆环
+        function generateToruses() {
+            const segmentCount = Math.floor(curvePoints.length / 20);
+            
+            for (let i = 0; i < segmentCount; i++) {
+                const index = i * 20;
+                if (index >= curvePoints.length) break;
                 
-                const geometry = new THREE.TorusGeometry(23, 3, 16, 100);
-                const material = new THREE.MeshBasicMaterial({
-                    color: new THREE.Color(Math.random(), Math.random(), Math.random())
+                // 获取曲线上的点和切线
+                const point = curvePoints[index];
+                const tangent = curve.getTangent(index / curvePoints.length).normalize();
+                
+                // 计算旋转
+                const up = new THREE.Vector3(0, 1, 0);
+                const axis = new THREE.Vector3().crossVectors(up, tangent).normalize();
+                const angle = Math.acos(up.dot(tangent));
+                const quaternion = new THREE.Quaternion().setFromAxisAngle(axis, angle);
+                
+                // 随机颜色
+                const color = new THREE.Color(
+                    0.8 + Math.random() * 0.2,
+                    0.6 + Math.random() * 0.2,
+                    0.1 + Math.random() * 0.1
+                );
+                
+                // 创建圆环
+                const geometry = new THREE.TorusGeometry(23, 3, 16, 32);
+                const material = new THREE.MeshStandardMaterial({
+                    color: color,
+                    emissive: color.clone().multiplyScalar(0.2),
+                    metalness: 0.7,
+                    roughness: 0.2
                 });
                 const torus = new THREE.Mesh(geometry, material);
-                torus.position.copy(pos);
-                torus.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tangent);
+                torus.position.copy(point);
+                torus.setRotationFromQuaternion(quaternion);
+                
+                // 添加到场景和数组
                 scene.add(torus);
                 toruses.push(torus);
             }
         }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const delta = speed / curve.getLength() / 60;
-
-            // 更新摄像机位置
-            cameraT = (cameraT + delta + 1) % 1;
-            const camPos = curve.getPoint(cameraT);
-            const tangent = curve.getTangent(cameraT).normalize();
+        
+        // 创建摄像机指示器
+        function createCameraIndicator() {
+            const geometry = new THREE.BoxGeometry(15, 15, 30);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x2ecc71,
+                emissive: 0x1abc9c,
+                emissiveIntensity: 0.5
+            });
+            const indicator = new THREE.Mesh(geometry, material);
+            scene.add(indicator);
+            return indicator;
+        }
+        
+        // 更新摄像机位置
+        function updateCameraPosition() {
+            const curvePosition = cameraPositionOnCurve % 1;
+            const cameraPoint = curve.getPoint(curvePosition);
+            const tangent = curve.getTangent(curvePosition).normalize();
             
-            camera.position.copy(camPos);
-            camera.lookAt(camPos.clone().add(tangent));
-
-            // 更新可见物体（示例逻辑）
-            spheres.forEach(sphere => sphere.visible = 
-                sphere.position.distanceTo(camPos) < 1200
-            );
-
+            // 计算摄像机位置（稍微偏移）
+            const offset = new THREE.Vector3(0, 40, 80);
+            const cameraPos = new THREE.Vector3().addVectors(cameraPoint, offset);
+            
+            // 设置摄像机位置和朝向
+            camera.position.copy(cameraPos);
+            camera.lookAt(cameraPoint);
+            
+            // 更新轨道控制器目标
+            controls.target.copy(cameraPoint);
+        }
+        
+        // 移除超出范围的物体
+        function removeOutOfRangeObjects() {
+            // 这里简化为移除最远的物体（实际项目中需要更精确的计算）
+            if (spheres.length > 500) {
+                const sphereToRemove = spheres.shift();
+                scene.remove(sphereToRemove);
+            }
+            
+            if (toruses.length > 100) {
+                const torusToRemove = toruses.shift();
+                scene.remove(torusToRemove);
+            }
+        }
+        
+        // 动画循环
+        function animate(timestamp) {
+            requestAnimationFrame(animate);
+            
+            // 计算时间增量
+            const deltaTime = lastTime ? (timestamp - lastTime) / 1000 : 0;
+            lastTime = timestamp;
+            
+            // 更新轨道控制器
+            controls.update();
+            
+            // 更新摄像机沿曲线移动
+            if (animationRunning) {
+                cameraPositionOnCurve += speed * deltaTime / curvePoints.length;
+                updateCameraPosition();
+            }
+            
+            // 旋转球体和圆环
+            spheres.forEach(sphere => {
+                sphere.rotation.x += 0.01;
+                sphere.rotation.y += 0.01;
+            });
+            
+            toruses.forEach(torus => {
+                torus.rotation.x += 0.005;
+                torus.rotation.z += 0.005;
+            });
+            
+            // 移除超出范围的物体
+            removeOutOfRangeObjects();
+            
+            // 渲染场景
             renderer.render(scene, camera);
         }
-
-        window.addEventListener('resize', () => {
+        
+        // 事件监听器
+        document.getElementById('speedInput').addEventListener('input', function() {
+            speed = parseFloat(this.value);
+            document.getElementById('speedSlider').value = speed;
+        });
+        
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            speed = parseFloat(this.value);
+            document.getElementById('speedInput').value = speed;
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', initScene);
+        
+        document.getElementById('toggleBtn').addEventListener('click', function() {
+            animationRunning = !animationRunning;
+        });
+        
+        // 窗口大小调整
+        window.addEventListener('resize', function() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+        
+        // 启动动画
+        animate();
     </script>
 </body>
 </html>
